@@ -40,3 +40,12 @@ client sending message: "this is my last message"
 enter message to send to server: "quit"
 client informing server that it is quitting.
 client receuved mesaage log. 
+this is my first message.
+and now my second message
+this is my last message
+
+error conditions 
+while you do not need to show error conditions when demonstrating the operation of your client and server,, you must check for these error conditions in your code.
+
+questions
+
