@@ -3,8 +3,8 @@ import socket
 # array to store messages from client 
 messages = []
 
-# receive server port from user 
-serverPort = int(input("Enter server port: "))
+# ask for port number from user
+serverPort = int(input("Enter server port number: "))
 
 # create a server socket 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,8 +33,8 @@ while True:
     # check if the message is quit, if not just continue with loop
     if message == "quit":
         print("The client has informed the server that it is quitting.")
-        for message in messages:
-            connection.send(message.encode())
+        # with join we separate the messages with a new line
+        connection.send("\n".join(messages).encode())
         break
     else:
         print("Server received message:", message)
@@ -42,3 +42,4 @@ while True:
 
 # close the connection between client and server
 connection.close()
+serverSocket.close()
