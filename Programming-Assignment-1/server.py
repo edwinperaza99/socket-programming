@@ -15,7 +15,11 @@ while True:
         print("Invalid input. Port number must be an integer.")
 
 # create a server socket 
-serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error as errorMessage:
+    print(f"Failed to create server socket. Error: {errorMessage}")
+    exit(1)
 
 # bind the port number to the server socket 
 try:

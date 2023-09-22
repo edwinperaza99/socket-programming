@@ -15,7 +15,11 @@ while True:
 serverIP = input("Enter server IP address: ")
 
 # create a client socket 
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error as errorMessage:
+    print(f"Failed to create client socket. Error: {errorMessage}")
+    exit(1)
 
 # connect to the server
 try:
@@ -29,16 +33,15 @@ print("\nClient has connected to the server!\n")
 
 while True:
     message = input("Enter a message to send to server: ")
-    print("Client sending message:", message)
     if message == "quit":
         clientSocket.send(message.encode())
-        print("Client informing server that it is quitting.")
+        print("\nClient informing server that it is quitting.")
         try:
             messages = clientSocket.recv(2048).decode()
             if not messages:
                 print("No messages were received from server messages log.")
                 break
-            print("Client received messages log")
+            print("Client received messages log:\n")
             print(messages)
             break
         except socket.error as errorMessage:
@@ -46,6 +49,7 @@ while True:
             clientSocket.close()
             exit(1)
     else:
+        print("Client sending message:", message)
         clientSocket.send(message.encode())
 
 clientSocket.close()
