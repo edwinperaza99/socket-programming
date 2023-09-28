@@ -59,6 +59,12 @@ def disconnect():
     print("disconnect command")
     connected == False
 
+# function to send message 
+def send(message):
+    chatSocket.send(message.encode())
+    print(f"Message \"{message}\" sent")
+
+
 # print initial command list
 print_commands()
 
@@ -119,7 +125,14 @@ while connected == True:
             print_commands()
         # handle send command        
         elif commandParts[0] == "send":
-            print("send command")
+            if len(commandParts) < 2:
+                print("Command message was received, but no message was attached to command.")
+                print("Expected format: send <message>")
+            else:
+                # craft message to be sent, remove command "send" from message
+                message = ' '.join(commandParts[1:])
+                # call function to send message 
+                send(message)
         # handle disconnect command
         elif commandParts[0] == "disconnect":
             print("disconnect command")
