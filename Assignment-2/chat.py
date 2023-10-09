@@ -1,4 +1,4 @@
-import socket 
+import socket
 
 # Get the hostname and IP address of the server
 hostname = socket.gethostname()
@@ -15,21 +15,39 @@ while True:
     except ValueError:
         print("Invalid input. Port number must be an integer.")
 
-# create a socket  
-try:
-    chatSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-except socket.error as errorMessage:
-    print(f"Failed to create client socket. Error: {errorMessage}")
-    exit(1)
+# TODO: check that this even works 
+# create a socket
+def start_server():
+    """ 
+    Creates a socket and binds it to the server address and port number.
+    """
+    try:
+        chatSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as errorMessage:
+        print(f"Failed to create client socket. Error: {errorMessage}")
+        exit(1)
+    try:
+        chatSocket.bind((serverAddress, serverPort))
+    except socket.error as errorMessage:
+        print(f"Failed to bind socket. Error: {errorMessage}")
+        exit(1)
+    # listen for incoming connections
+    chatSocket.listen(1)
+    # inform user that chat is ready to start
+    print(f"Chat running at {serverAddress} on port {serverPort}\n")
 
-# inform user that chat is ready to start
-print(f"Chat running at {serverAddress} on port {serverPort}\n")
+start_server()
 
 # variable to keep track of whether we are connected to a chat
 connected = False
 
 # can add if to see if we need to print commands inside while loop
 def print_commands():
+    """ 
+    Prints the list of commands that the user can enter.
+    
+    It prints different commands depending if the user is connected or waiting for a connection
+    """
     if connected == False:
         # print command list 
         print("List of commands:") 
