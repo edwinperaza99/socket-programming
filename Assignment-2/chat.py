@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 
 # Get the hostname and IP address of the server
 hostname = socket.gethostname()
@@ -205,11 +206,15 @@ def main():
                     print("Not connected to a chat. Disconnect command is not available.")
             # handle exit command
             elif commandParts[0] == "exit":
-                print("exit command")
+                print("\nExiting program in:")
                 server_socket.close()
                 exit_flag = True
                 server_thread.join()
                 receive_thread.join()
+                for i in range(3, 0, -1):
+                    print(i)
+                    time.sleep(1)  # Sleep for 1 second
+                print("\nExited program.\n")
                 exit(0)
             # handle invalid command
             else:
