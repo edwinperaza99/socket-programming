@@ -22,6 +22,7 @@ def print_commands():
     
     It prints different commands depending if the user is connected or waiting for a connection
     """
+    global connected
     if connected == False:
         # print command list 
         print("\nList of commands:") 
@@ -53,7 +54,7 @@ def connect(serverIP, serverPort):
         chat_connection.close()
         return
     print(f"\nChat connected at {serverIP} on port {serverPort}\n")
-
+    connected = True
 
 # function to disconnect from server
 def disconnect():
@@ -96,14 +97,25 @@ def receive_message():
             # chat_connection.close()
             # exit(1)
 
-def wait_for_connection(server_socket):
+def wait_for_connection(server_port):
     global connected, chat_connection, client_address
+    # create a socket
+    try:
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as errorMessage:
+        print(f"Failed to create client socket. Error: {errorMessage}")
+        exit(1)
+    try:
+        server_socket.bind(('', server_port))
+    except socket.error as errorMessage:
+        print(f"Failed to bind socket. Error: {errorMessage}")
+        exit(1)
     # loop to check for connection
     server_socket.listen(1)
     while not exit_flag.is_set: 
         if connected == False:
             try:
-                chat_connection, client_address = server_socket.accept()
+                client_connection, client_address = server_socket.accept()
                 print("Server connected to client at address:", client_address, end="\n\n")
                 connected = True
 
@@ -128,19 +140,8 @@ def main():
         except ValueError:
             print("Invalid input. Port number must be an integer.")
 
-    # create a socket
-    try:
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error as errorMessage:
-        print(f"Failed to create client socket. Error: {errorMessage}")
-        exit(1)
-    try:
-        server_socket.bind(('', server_port))
-    except socket.error as errorMessage:
-        print(f"Failed to bind socket. Error: {errorMessage}")
-        exit(1)
     # listen for incoming connections
-    server_thread = threading.Thread(target=wait_for_connection, args=(server_socket,))
+    server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
     server_thread.start()
 
     receive_thread = threading.Thread(target=receive_message, args=())
