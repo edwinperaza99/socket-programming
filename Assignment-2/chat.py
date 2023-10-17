@@ -112,14 +112,14 @@ def wait_for_connection(server_port):
         print(f"Failed to bind socket. Error: {errorMessage}")
         exit(1)
     server_socket.listen(1)
-    client_connection, client_address = server_socket.accept()
-    print_commands()
+
     # loop to check for connection
     while not exit_flag.is_set: 
         print("Waiting for connection... inside loop")
         if connected == False:
             try:
-                client_connection, client_address = server_socket.accept()
+                print("I got this far")
+                chat_connection, client_address = server_socket.accept()
                 print("Server connected to client at address:", client_address, end="\n\n")
                 connected = True
 
