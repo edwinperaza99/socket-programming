@@ -7,7 +7,7 @@ hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
 # define exit flag for threads 
-exit_flag = False
+exit_flag = threading.Event()
 
 # variable to keep track of whether we are connected to a chat
 connected = False
@@ -83,14 +83,12 @@ def send(message):
 
 def receive_message():
     global connected, chat_connection
-    while not exit_flag:
+    while not exit_flag.is_set:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if message:
                     print(f"Message received: {message}")
-                else:
-                    print("No message received.")
             else:
                 pass
         except socket.error as errorMessage:
@@ -102,7 +100,7 @@ def wait_for_connection(server_socket):
     global connected, chat_connection, client_address
     # loop to check for connection
     server_socket.listen(1)
-    while not exit_flag: 
+    while not exit_flag.is_set: 
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
@@ -155,7 +153,7 @@ def main():
     print_commands()
 
     # loop to handle main program commands 
-    while not exit_flag:
+    while True:
         try:
             command = input("Enter command: ")
         except ValueError:
@@ -208,7 +206,7 @@ def main():
             elif commandParts[0] == "exit":
                 print("\nExiting program in:")
                 server_socket.close()
-                exit_flag = True
+                exit_flag.set()
                 server_thread.join()
                 receive_thread.join()
                 for i in range(3, 0, -1):
