@@ -100,6 +100,7 @@ def receive_message():
 def wait_for_connection(server_port):
     global connected, chat_connection, client_address, server_socket
     # create a socket
+    print("Waiting for connection...")
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
@@ -110,9 +111,12 @@ def wait_for_connection(server_port):
     except socket.error as errorMessage:
         print(f"Failed to bind socket. Error: {errorMessage}")
         exit(1)
-    # loop to check for connection
     server_socket.listen(1)
+    client_connection, client_address = server_socket.accept()
+    print_commands()
+    # loop to check for connection
     while not exit_flag.is_set: 
+        print("Waiting for connection... inside loop")
         if connected == False:
             try:
                 client_connection, client_address = server_socket.accept()
