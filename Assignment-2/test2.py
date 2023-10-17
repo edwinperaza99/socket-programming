@@ -5,14 +5,13 @@ import threading
 hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
-# define exit flag for threads 
-exit_flag = False
+
 
 # variable to keep track of whether we are connected to a chat
 connected = False
 
 # store the socket of the client 
-# chat_connection = None
+# client_socket = None
 
 # can add if to see if we need to print commands inside while loop
 def print_commands():
@@ -36,29 +35,32 @@ def print_commands():
 
 # function to connect to server
 def connect(serverIP, serverPort):
-    global connected, chat_connection
+    global connected, client_socket
     print("connect command")
     # create a client socket 
     try:
-        chat_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
         print(f"Failed to create client socket. Error: {errorMessage}")
         return
     # connect to the server
     try:
-        chat_connection.connect((serverIP, serverPort))
+        client_socket.connect((serverIP, serverPort))
     except socket.error as errorMessage:
         print(f"Failed to connect to client. Error: {errorMessage}")
-        chat_connection.close()
+        client_socket.close()
         return
     print(f"\nChat connected at {serverIP} on port {serverPort}\n")
 
 
 # function to disconnect from server
 def disconnect():
-    global connected, chat_connection
+    global connected, client_socket, chat_connection
     print("disconnect command")
-    if chat_connection != None:
+    if client_socket != None:
+        client_socket.close()
+        # client_socket = None
+    elif chat_connection != None:
         chat_connection.close()
         # chat_connection = None
     print("Chat disconnected.")
@@ -66,10 +68,13 @@ def disconnect():
 
 # function to send message 
 def send(message):
-    global connected, chat_connection
+    global client_socket, connected, chat_connection
     if connected == True:
         if chat_connection != None:
             chat_connection.send(message.encode())
+            print(f"Message \"{message}\" sent")
+        elif client_socket != None:
+            client_socket.send(message.encode())
             print(f"Message \"{message}\" sent")
     # we do not have a connection 
     else:
@@ -80,28 +85,11 @@ def send(message):
     # print(len(commandParts))
     # print(commandParts[0])
 
-def receive_message():
-    global connected, chat_connection
-    while not exit_flag:
-        try:
-            if connected == True:
-                message = chat_connection.recv(1024).decode()
-                if message:
-                    print(f"Message received: {message}")
-                else:
-                    print("No message received.")
-            else:
-                pass
-        except socket.error as errorMessage:
-            print(f"Failure in message reception. Error: {errorMessage}")
-            # chat_connection.close()
-            # exit(1)
-
 def wait_for_connection(server_socket):
     global connected, chat_connection, client_address
     # loop to check for connection
     server_socket.listen(1)
-    while not exit_flag: 
+    while True: 
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
@@ -117,7 +105,6 @@ def wait_for_connection(server_socket):
             pass
 
 def main():
-    global exit_flag, connected
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -154,7 +141,7 @@ def main():
     print_commands()
 
     # loop to handle main program commands 
-    while not exit_flag:
+    while True:
         try:
             command = input("Enter command: ")
         except ValueError:
@@ -206,11 +193,7 @@ def main():
             # handle exit command
             elif commandParts[0] == "exit":
                 print("exit command")
-                server_socket.close()
-                exit_flag = True
-                server_thread.join()
-                receive_thread.join()
-                exit(0)
+                break
             # handle invalid command
             else:
                 print("Invalid command. Please enter a valid command from the list.")
