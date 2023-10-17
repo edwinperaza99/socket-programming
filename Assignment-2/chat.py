@@ -78,7 +78,7 @@ def disconnect():
     chat_connection.send(message.encode())
     chat_connection.close()
     server_socket.close()
-    # start_server()
+    start_server()
     print("Chat disconnected.")
     connected = False
 
