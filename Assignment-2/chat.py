@@ -64,7 +64,7 @@ def disconnect():
     message = "DISCONNECT NOW"
     chat_connection.send(message.encode())
     chat_connection.close()
-    # server_socket.close()
+    server_socket.close()
     # start_server()
     print("Chat disconnected.")
     connected = False
@@ -91,7 +91,7 @@ def receive_message():
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
-                if message == "QUIT NOW":
+                if message == "DISCONNECT NOW":
                     disconnect()
                 elif message:
                     print(f"\nMessage received: {message}\nEnter command: ", end="")
@@ -122,9 +122,7 @@ def wait_for_connection(server_port):
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
-                print(f"\n\nServer connected to client at address: {client_address}\n")
-                # print new commands 
-                print("Enter command: ", end="")
+                print(f"\n\nChat connected to address: {client_address[0]}\nEnter command: ", end="")
                 connected = True
                 
             except socket.error as errorMessage:
@@ -187,7 +185,7 @@ def main():
                         if serverPort < 10000 or serverPort > 20000:
                             print("Port number must be between 10,000 and 20,000.")
                         else:
-                            print (f"Connecting to {commandParts[1]} on port {commandParts[2]}")
+                            print (f"\nConnecting to {commandParts[1]} on port {commandParts[2]}")
                             connect(commandParts[1], serverPort)
                 else: 
                     print("Already connected to a chat. Please disconnect before connecting to another chat.")
