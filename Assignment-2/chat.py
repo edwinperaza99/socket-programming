@@ -76,11 +76,11 @@ def disconnect():
     print("\nDisconnecting...")
     message = "DISCONNECT NOW"
     chat_connection.send(message.encode())
+    connected = False
     chat_connection.close()
     server_socket.close()
     start_server(server_port)
     print("Chat disconnected.")
-    connected = False
 
 # function to send message 
 def send(message):
@@ -118,25 +118,13 @@ def receive_message():
 def wait_for_connection(server_port):
     global connected, chat_connection, client_address, server_socket
     server_socket = start_server(server_port)
-    # # create a socket
-    # try:
-    #     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # except socket.error as errorMessage:
-    #     print(f"Failed to create client socket. Error: {errorMessage}")
-    #     exit(1)
-    # try:
-    #     server_socket.bind(('', server_port))
-    # except socket.error as errorMessage:
-    #     print(f"Failed to bind socket. Error: {errorMessage}")
-    #     exit(1)
-    # server_socket.listen(1)
 
     # loop to check for connection
     while not exit_flag: 
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
-                print(f"\n\nChat connected to address: {client_address[0]}\nEnter command: ", end="")
+                print(f"\n\nChat connected to address: {client_address[0]}\n\nEnter command: ", end="")
                 connected = True
                 
             except socket.error as errorMessage:
