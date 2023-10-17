@@ -87,7 +87,7 @@ def receive_message():
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if message:
-                    print(f"\nMessage received: {message}\nEnter command:")
+                    print(f"\nMessage received: {message}\nEnter command:", end="")
             else:
                 pass
         except socket.error as errorMessage:
@@ -116,7 +116,7 @@ def wait_for_connection(server_port):
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
-                print("Server connected to client at address:", client_address, end="\n\n")
+                print(f"\nServer connected to client at address: {client_address}\n")
                 connected = True
 
                 # print new commands 
