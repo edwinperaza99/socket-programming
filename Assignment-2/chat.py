@@ -36,7 +36,20 @@ def print_commands():
         print("help")
         print("exit\n")
 
-# def start_server():
+def start_server(server_port):
+    # create a socket
+    try:
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as errorMessage:
+        print(f"Failed to create client socket. Error: {errorMessage}")
+        exit(1)
+    try:
+        server_socket.bind(('', server_port))
+    except socket.error as errorMessage:
+        print(f"Failed to bind socket. Error: {errorMessage}")
+        exit(1)
+    server_socket.listen(1)
+    return server_socket
 
 # function to connect to server
 def connect(serverIP, serverPort):
@@ -60,7 +73,7 @@ def connect(serverIP, serverPort):
 # function to disconnect from server
 def disconnect():
     global connected, chat_connection
-    print("Disconnecting...")
+    print("\nDisconnecting...")
     message = "DISCONNECT NOW"
     chat_connection.send(message.encode())
     chat_connection.close()
@@ -104,18 +117,19 @@ def receive_message():
 
 def wait_for_connection(server_port):
     global connected, chat_connection, client_address, server_socket
-    # create a socket
-    try:
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error as errorMessage:
-        print(f"Failed to create client socket. Error: {errorMessage}")
-        exit(1)
-    try:
-        server_socket.bind(('', server_port))
-    except socket.error as errorMessage:
-        print(f"Failed to bind socket. Error: {errorMessage}")
-        exit(1)
-    server_socket.listen(1)
+    server_socket = start_server(server_port)
+    # # create a socket
+    # try:
+    #     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # except socket.error as errorMessage:
+    #     print(f"Failed to create client socket. Error: {errorMessage}")
+    #     exit(1)
+    # try:
+    #     server_socket.bind(('', server_port))
+    # except socket.error as errorMessage:
+    #     print(f"Failed to bind socket. Error: {errorMessage}")
+    #     exit(1)
+    # server_socket.listen(1)
 
     # loop to check for connection
     while not exit_flag: 
