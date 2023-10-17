@@ -7,7 +7,7 @@ hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
 # define exit flag for threads 
-exit_flag = threading.Event()
+exit_flag = False
 
 # variable to keep track of whether we are connected to a chat
 connected = False
@@ -61,6 +61,8 @@ def connect(serverIP, serverPort):
 def disconnect():
     global connected, chat_connection
     print("Disconnecting...")
+    message = "DISCONNECT NOW"
+    chat_connection.send(message.encode())
     chat_connection.close()
     # server_socket.close()
     # start_server()
@@ -85,11 +87,13 @@ def send(message):
 
 def receive_message():
     global connected, chat_connection
-    while exit_flag.is_set:
+    while not exit_flag:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
-                if message:
+                if message == "QUIT NOW":
+                    disconnect()
+                elif message:
                     print(f"\nMessage received: {message}\nEnter command: ", end="")
             else:
                 pass
@@ -101,7 +105,6 @@ def receive_message():
 def wait_for_connection(server_port):
     global connected, chat_connection, client_address, server_socket
     # create a socket
-    print("Waiting for connection...")
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
@@ -115,15 +118,14 @@ def wait_for_connection(server_port):
     server_socket.listen(1)
 
     # loop to check for connection
-    while exit_flag.is_set: 
+    while not exit_flag: 
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
-                print(f"\nServer connected to client at address: {client_address}\n")
-                connected = True
-
+                print(f"\n\nServer connected to client at address: {client_address}\n")
                 # print new commands 
                 print("Enter command: ", end="")
+                connected = True
                 
             except socket.error as errorMessage:
                 pass
@@ -131,7 +133,7 @@ def wait_for_connection(server_port):
             pass
 
 def main():
-    global exit_flag, connected, server_socket
+    global exit_flag, connected, server_socket, chat_connection
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -210,8 +212,9 @@ def main():
             # handle exit command
             elif commandParts[0] == "exit":
                 print("\nExiting program in:")
+                exit_flag = True
                 server_socket.close()
-                exit_flag.set()
+                chat_connection.close()
                 server_thread.join()
                 receive_thread.join()
                 for i in range(3, 0, -1):
