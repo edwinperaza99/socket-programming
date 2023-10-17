@@ -59,10 +59,8 @@ def connect(serverIP, serverPort):
 # function to disconnect from server
 def disconnect():
     global connected, chat_connection
-    print("disconnect command")
-    if chat_connection != None:
-        chat_connection.close()
-        # chat_connection = None
+    print("Disconnecting...")
+    chat_connection.close()
     print("Chat disconnected.")
     connected = False
 
@@ -89,7 +87,7 @@ def receive_message():
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if message:
-                    print(f"Message received: {message}")
+                    print(f"\nMessage received: {message}\nEnter command:")
             else:
                 pass
         except socket.error as errorMessage:
@@ -115,10 +113,8 @@ def wait_for_connection(server_port):
 
     # loop to check for connection
     while exit_flag.is_set: 
-        print("Waiting for connection... inside loop")
         if connected == False:
             try:
-                print("I got this far")
                 chat_connection, client_address = server_socket.accept()
                 print("Server connected to client at address:", client_address, end="\n\n")
                 connected = True
