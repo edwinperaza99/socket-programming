@@ -98,7 +98,7 @@ def receive_message():
             # exit(1)
 
 def wait_for_connection(server_port):
-    global connected, chat_connection, client_address
+    global connected, chat_connection, client_address, server_socket
     # create a socket
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -128,7 +128,7 @@ def wait_for_connection(server_port):
             pass
 
 def main():
-    global exit_flag, connected
+    global exit_flag, connected, server_socket
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -144,7 +144,7 @@ def main():
     server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
     server_thread.start()
 
-    receive_thread = threading.Thread(target=receive_message, args=())
+    receive_thread = threading.Thread(target=receive_message)
     receive_thread.start()
 
     # inform user that chat is ready to start
@@ -182,6 +182,7 @@ def main():
                         if serverPort < 10000 or serverPort > 20000:
                             print("Port number must be between 10,000 and 20,000.")
                         else:
+                            print (f"Connecting to {commandParts[1]} on port {commandParts[2]}")
                             connect(commandParts[1], serverPort)
                 else: 
                     print("Already connected to a chat. Please disconnect before connecting to another chat.")
