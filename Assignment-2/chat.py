@@ -89,8 +89,6 @@ def receive_message():
                 message = chat_connection.recv(1024).decode()
                 if message:
                     print(f"Message received: {message}")
-                else:
-                    print("No message received.")
             else:
                 pass
         except socket.error as errorMessage:
