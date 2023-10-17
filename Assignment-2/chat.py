@@ -84,7 +84,7 @@ def send(message):
 
 def receive_message():
     global connected, chat_connection
-    while not exit_flag.is_set:
+    while exit_flag.is_set:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
@@ -114,7 +114,7 @@ def wait_for_connection(server_port):
     server_socket.listen(1)
 
     # loop to check for connection
-    while not exit_flag.is_set: 
+    while exit_flag.is_set: 
         print("Waiting for connection... inside loop")
         if connected == False:
             try:
