@@ -36,10 +36,11 @@ def print_commands():
         print("help")
         print("exit\n")
 
+# def start_server():
+
 # function to connect to server
 def connect(serverIP, serverPort):
     global connected, chat_connection
-    print("connect command")
     # create a client socket 
     try:
         chat_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,18 +50,20 @@ def connect(serverIP, serverPort):
     # connect to the server
     try:
         chat_connection.connect((serverIP, serverPort))
+        print(f"\nChat connected at {serverIP} on port {serverPort}\n")
+        connected = True
     except socket.error as errorMessage:
         print(f"Failed to connect to client. Error: {errorMessage}")
         chat_connection.close()
         return
-    print(f"\nChat connected at {serverIP} on port {serverPort}\n")
-    connected = True
 
 # function to disconnect from server
 def disconnect():
     global connected, chat_connection
     print("Disconnecting...")
     chat_connection.close()
+    # server_socket.close()
+    # start_server()
     print("Chat disconnected.")
     connected = False
 
@@ -87,7 +90,7 @@ def receive_message():
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if message:
-                    print(f"\nMessage received: {message}\nEnter command:", end="")
+                    print(f"\nMessage received: {message}\nEnter command: ", end="")
             else:
                 pass
         except socket.error as errorMessage:
@@ -120,7 +123,7 @@ def wait_for_connection(server_port):
                 connected = True
 
                 # print new commands 
-                print_commands()
+                print("Enter command: ", end="")
                 
             except socket.error as errorMessage:
                 pass
@@ -201,7 +204,7 @@ def main():
             # handle disconnect command
             elif commandParts[0] == "disconnect":
                 if connected == True:
-                    print("disconnect command")
+                    disconnect()
                 else:
                     print("Not connected to a chat. Disconnect command is not available.")
             # handle exit command
