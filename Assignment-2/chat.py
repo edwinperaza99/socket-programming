@@ -72,13 +72,13 @@ def connect(serverIP, serverPort):
 
 # function to disconnect from server
 def disconnect():
-    global connected, chat_connection
+    global connected, chat_connection, server_port
     print("\nDisconnecting...")
     message = "DISCONNECT NOW"
     chat_connection.send(message.encode())
     chat_connection.close()
     server_socket.close()
-    start_server()
+    start_server(server_port)
     print("Chat disconnected.")
     connected = False
 
@@ -145,7 +145,7 @@ def wait_for_connection(server_port):
             pass
 
 def main():
-    global exit_flag, connected, server_socket, chat_connection
+    global exit_flag, connected, server_socket, chat_connection, server_port
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
