@@ -66,20 +66,23 @@ def connect(serverIP, serverPort):
         print(f"\nChat connected at {serverIP} on port {serverPort}\n")
         connected = True
     except socket.error as errorMessage:
-        print(f"Failed to connect to client. Error: {errorMessage}")
+        print(f"\nFailed to connect to client. Error: {errorMessage}")
         chat_connection.close()
         return
 
 # function to disconnect from server
 def disconnect():
-    global connected, chat_connection, server_port
+    global connected, chat_connection
     print("\nDisconnecting...")
-    message = "DISCONNECT NOW"
-    chat_connection.send(message.encode())
+    if chat_connection:
+        try: 
+            chat_connection.send(b' ')
+        except socket.error as errorMessage:
+            print(f"\nFailed to send disconnect message. Error: {errorMessage}")
+    # close socket 
     connected = False
     chat_connection.close()
-    server_socket.close()
-    start_server(server_port)
+    # start_server(server_port)
     print("Chat disconnected.")
 
 # function to send message 
@@ -91,7 +94,7 @@ def send(message):
             print(f"Message \"{message}\" sent")
     # we do not have a connection 
     else:
-        print("Not connected to a chat. Please connect to a chat before sending a message.")
+        print("\nNot connected to a chat. Please connect to a chat before sending a message.")
 
     # testing 
     # print(commandParts)
@@ -99,21 +102,25 @@ def send(message):
     # print(commandParts[0])
 
 def receive_message():
-    global connected, chat_connection
+    global connected, chat_connection, client_address, exit_flag
     while not exit_flag:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
-                if message == "DISCONNECT NOW":
-                    disconnect()
+                if not message:
+                    # If the received message is empty, it's a sign of disconnection.
+                    print(f"\n\nHost at {client_address[0]} disconnected")
+                    chat_connection.close()
+                    connected = False
                 elif message:
                     print(f"\nMessage received: {message}\nEnter command: ", end="")
             else:
                 pass
-        except socket.error as errorMessage:
-            print(f"Failure in message reception. Error: {errorMessage}")
-            # chat_connection.close()
-            # exit(1)
+        except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
+            print(f"\nFailure in message reception. Error: {errorMessage}")
+            print(f"\n\nHost at {client_address[0]} disconnected")
+            chat_connection.close()
+            connected = False
 
 def wait_for_connection(server_port):
     global connected, chat_connection, client_address, server_socket
