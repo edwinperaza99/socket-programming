@@ -58,7 +58,7 @@ def connect(serverIP, serverPort):
     try:
         chat_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
-        print(f"Failed to create client socket. Error: {errorMessage}")
+        print(f"\nFailed to create client socket. Error: {errorMessage}")
         return
     # connect to the server
     try:
@@ -170,13 +170,12 @@ def main():
         try:
             command = input("Enter command: ")
         except ValueError:
-            print("Invalid input. Please enter a valid command from the list.")
-            print("Type 'help' to see the list of commands.\n")
+            print("Invalid input. Please enter a valid command from the list. \nType 'help' to see the list of commands.\n")
         # split command into parts
         commandParts = command.split()
         # check if command is valid when nothing is input
         if len(commandParts) < 1:
-            print("Invalid command. Please enter a valid command from the list.")
+            print("Invalid command. Please enter a valid command from the list. \nType 'help' to see the list of commands.\n")
         # command is not empty so check if it is valid
         else:
             # handle command help
@@ -204,18 +203,18 @@ def main():
                         print("Command message was received, but no message was attached to command.")
                         print("Expected format: send <message>")
                     else:
-                        # craft message to be sent, remove command "send" from message
+                        # craft message to be sent, remove command "send" from messages
                         message = ' '.join(commandParts[1:])
                         # call function to send message 
                         send(message)
                 else:
-                    print("Not connected to a chat. Please connect to a chat before sending a message.")
+                    print("Not connected to a chat. Please connect to a chat before sending a message.\n")
             # handle disconnect command
             elif commandParts[0] == "disconnect":
                 if connected == True:
                     disconnect()
                 else:
-                    print("Not connected to a chat. Disconnect command is not available.")
+                    print("Not connected to a chat. Disconnect command is not available.\n")
             # handle exit command
             elif commandParts[0] == "exit":
                 print("\nExiting program in:")
@@ -231,7 +230,7 @@ def main():
                 exit(0)
             # handle invalid command
             else:
-                print("Invalid command. Please enter a valid command from the list.")
+                print("Invalid command. Please enter a valid command from the list.\nType 'help' to see the list of commands.\n")
 
 
 
