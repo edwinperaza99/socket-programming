@@ -12,6 +12,9 @@ exit_flag = False
 # variable to keep track of whether we are connected to a chat
 connected = False
 
+# store client address 
+address = None
+
 # store the socket of the client 
 # chat_connection = None
 
@@ -118,6 +121,7 @@ def receive_message():
                 pass
         except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
             print(f"\nFailure in message reception. Error: {errorMessage}")
+            # might need to remove next line or the one in message 
             print(f"\n\nHost at {client_address[0]} disconnected")
             chat_connection.close()
             connected = False
