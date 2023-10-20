@@ -105,14 +105,14 @@ def send(message):
     # print(commandParts[0])
 
 def receive_message():
-    global connected, chat_connection, client_address, exit_flag
+    global connected, chat_connection, address, exit_flag
     while not exit_flag:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if not message:
                     # If the received message is empty, it's a sign of disconnection.
-                    print(f"\n\nHost at {client_address[0]} disconnected")
+                    print(f"\n\nHost at {address} disconnected")
                     chat_connection.close()
                     connected = False
                 elif message:
@@ -122,12 +122,13 @@ def receive_message():
         except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
             print(f"\nFailure in message reception. Error: {errorMessage}")
             # might need to remove next line or the one in message 
-            print(f"\n\nHost at {client_address[0]} disconnected")
+            print(f"\n\nHost at {address} disconnected")
+            # try without closing connection here 
             chat_connection.close()
             connected = False
 
 def wait_for_connection(server_port):
-    global connected, chat_connection, client_address, server_socket
+    global connected, chat_connection, client_address, server_socket, address
     server_socket = start_server(server_port)
 
     # loop to check for connection
@@ -135,7 +136,8 @@ def wait_for_connection(server_port):
         if connected == False:
             try:
                 chat_connection, client_address = server_socket.accept()
-                print(f"\n\nChat connected to address: {client_address[0]}\n\nEnter command: ", end="")
+                address = client_address[0]
+                print(f"\n\nChat connected to address: {address}\n\nEnter command: ", end="")
                 connected = True
                 
             except socket.error as errorMessage:
