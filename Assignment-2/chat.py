@@ -66,7 +66,7 @@ def connect(serverIP, serverPort):
     # connect to the server
     try:
         chat_connection.connect((serverIP, serverPort))
-        print(f"\nChat connected at {serverIP} on port {serverPort}\n")
+        print(f"\nSuccessfully connected with {serverIP}\n")
         connected = True
     except socket.error as errorMessage:
         print(f"\nFailed to connect to client. Error: {errorMessage}")
@@ -116,14 +116,10 @@ def receive_message():
                     chat_connection.close()
                     connected = False
                 elif message:
-                    print(f"\nMessage received: {message}\nEnter command: ", end="")
+                    print(f"\nMessage \"{message}\"received \n\nEnter command: ", end="")
             else:
                 pass
         except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
-            print(f"\nFailure in message reception. Error: {errorMessage}")
-            # might need to remove next line or the one in message 
-            print(f"\n\nHost at {address} disconnected")
-            # try without closing connection here 
             chat_connection.close()
             connected = False
 
@@ -137,7 +133,7 @@ def wait_for_connection(server_port):
             try:
                 chat_connection, client_address = server_socket.accept()
                 address = client_address[0]
-                print(f"\n\nChat connected to address: {address}\n\nEnter command: ", end="")
+                print(f"\n\nAccepted connection with {address}\n\nEnter command: ", end="")
                 connected = True
                 
             except socket.error as errorMessage:
@@ -199,7 +195,6 @@ def main():
                         if serverPort < 10000 or serverPort > 20000:
                             print("Port number must be between 10,000 and 20,000.")
                         else:
-                            print (f"\nConnecting to {commandParts[1]} on port {commandParts[2]}")
                             connect(commandParts[1], serverPort)
                 else: 
                     print("Already connected to a chat. Please disconnect before connecting to another chat.")
@@ -223,16 +218,11 @@ def main():
                     print("Not connected to a chat. Disconnect command is not available.\n")
             # handle exit command
             elif commandParts[0] == "exit":
-                print("\nExiting program in:")
                 exit_flag = True
                 server_socket.close()
                 chat_connection.close()
                 server_thread.join()
                 receive_thread.join()
-                for i in range(3, 0, -1):
-                    print(i)
-                    time.sleep(1)  # Sleep for 1 second
-                print("\nExited program.\n")
                 exit(0)
             # handle invalid command
             else:
