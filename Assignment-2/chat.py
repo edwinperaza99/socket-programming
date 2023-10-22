@@ -88,8 +88,6 @@ def disconnect():
     connected = False
     print(f"Disconnected from {address}\n")
     chat_connection.close()
-    # start_server(server_port)
-    print("Chat disconnected.")
 
 # function to send message 
 def send(message):
@@ -102,10 +100,6 @@ def send(message):
     else:
         print("\nNot connected to a chat. Please connect to a chat before sending a message.")
 
-    # testing 
-    # print(commandParts)
-    # print(len(commandParts))
-    # print(commandParts[0])
 
 def receive_message():
     global connected, chat_connection, serverIP, exit_flag
@@ -146,7 +140,7 @@ def wait_for_connection(server_port):
             pass
 
 def main():
-    global exit_flag, connected, server_socket, chat_connection, server_port
+    global exit_flag, connected, server_socket, chat_connection, server_port, serverIP
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
