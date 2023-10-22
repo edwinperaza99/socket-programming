@@ -124,11 +124,14 @@ def receive_message():
                     print(f"\nMessage \"{message}\" received \n\nEnter command: ", end="")
             else:
                 pass
-        except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
+        except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
             if address != None:
                 print(f"\n\nHost at {address} disconnected\n\nEnter command: ", end="")
             else:
                 print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
+            chat_connection.close()
+            connected = False
+        except socket.error as errorMessage:
             chat_connection.close()
             connected = False
 
