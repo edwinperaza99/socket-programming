@@ -75,8 +75,7 @@ def connect(serverIP, serverPort):
 
 # function to disconnect from server
 def disconnect():
-    global connected, chat_connection
-    print("\nDisconnecting...")
+    global connected, chat_connection, address
     if chat_connection:
         try: 
             chat_connection.send(b' ')
@@ -84,6 +83,7 @@ def disconnect():
             print(f"\nFailed to send disconnect message. Error: {errorMessage}")
     # close socket 
     connected = False
+    print(f"Disconnected from {address}\n")
     chat_connection.close()
     # start_server(server_port)
     print("Chat disconnected.")
@@ -116,7 +116,7 @@ def receive_message():
                     chat_connection.close()
                     connected = False
                 elif message:
-                    print(f"\nMessage \"{message}\"received \n\nEnter command: ", end="")
+                    print(f"\nMessage \"{message}\" received \n\nEnter command: ", end="")
             else:
                 pass
         except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
