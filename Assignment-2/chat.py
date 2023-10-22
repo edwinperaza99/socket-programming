@@ -105,15 +105,19 @@ def send(message):
 
 
 def receive_message():
-    global connected, chat_connection, serverIP, exit_flag
+    global connected, chat_connection, serverIP, exit_flag, address
     while not exit_flag:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if not message:
                     # If the received message is empty, it's a sign of disconnection.
-                    print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
-                    serverIP = None
+                    if address != None:
+                        print(f"\n\nHost at {address} disconnected\n\nEnter command: ", end="")
+                        address = None
+                    else:
+                        print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
+                        serverIP = None
                     chat_connection.close()
                     connected = False
                 elif message:
@@ -121,6 +125,7 @@ def receive_message():
             else:
                 pass
         except (socket.error, ConnectionResetError, ConnectionAbortedError) as errorMessage:
+            # print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: {errorMessage} ", end="")
             chat_connection.close()
             connected = False
 
