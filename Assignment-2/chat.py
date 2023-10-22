@@ -15,6 +15,9 @@ connected = False
 # store client address 
 address = None
 
+# store host IP address
+serverIP = None
+
 # store the socket of the client 
 # chat_connection = None
 
@@ -105,14 +108,15 @@ def send(message):
     # print(commandParts[0])
 
 def receive_message():
-    global connected, chat_connection, address, exit_flag
+    global connected, chat_connection, serverIP, exit_flag
     while not exit_flag:
         try:
             if connected == True:
                 message = chat_connection.recv(1024).decode()
                 if not message:
                     # If the received message is empty, it's a sign of disconnection.
-                    print(f"\n\nHost at {address} disconnected")
+                    print(f"\n\nHost at {serverIP} disconnected")
+                    serverIP = None
                     chat_connection.close()
                     connected = False
                 elif message:
@@ -195,6 +199,7 @@ def main():
                         if serverPort < 10000 or serverPort > 20000:
                             print("Port number must be between 10,000 and 20,000.")
                         else:
+                            serverIP = commandParts[1]
                             connect(commandParts[1], serverPort)
                 else: 
                     print("Already connected to a chat. Please disconnect before connecting to another chat.")
