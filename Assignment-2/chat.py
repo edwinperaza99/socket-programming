@@ -109,7 +109,7 @@ def receive_message():
                 message = chat_connection.recv(1024).decode()
                 if not message:
                     # If the received message is empty, it's a sign of disconnection.
-                    print(f"\n\nHost at {serverIP} disconnected")
+                    print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
                     serverIP = None
                     chat_connection.close()
                     connected = False
