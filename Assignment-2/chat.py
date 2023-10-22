@@ -1,36 +1,21 @@
 import socket
 import threading
-import time
+
+# Global variables 
+exit_flag = False       # flag to exit threads
+connected = False
+address = None
+host_ip = None
 
 # Get the hostname and IP address of the server
 hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
-# define exit flag for threads 
-exit_flag = False
 
-# variable to keep track of whether we are connected to a chat
-connected = False
-
-# store client address 
-address = None
-
-# store host IP address
-serverIP = None
-
-# store the socket of the client 
-# chat_connection = None
-
-# can add if to see if we need to print commands inside while loop
 def print_commands():
-    """ 
-    Prints the list of commands that the user can enter.
-    
-    It prints different commands depending if the user is connected or waiting for a connection
-    """
+    """Prints a list of available commands based on the connection status."""
     global connected
     if connected == False:
-        # print command list 
         print("\nList of commands:") 
         print("connect <IP address> <port number>")
         print("help")
@@ -42,8 +27,9 @@ def print_commands():
         print("help")
         print("exit\n")
 
-def start_server(server_port):
-    # create a socket
+
+def start_socket(server_port):
+    """Creates and configures a socket to listen for connections."""
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
@@ -57,8 +43,9 @@ def start_server(server_port):
     server_socket.listen(1)
     return server_socket
 
-# function to connect to server
+
 def connect(serverIP, serverPort):
+    """Attempts to connect to a chat server."""
     global connected, chat_connection
     # create a client socket 
     try:
@@ -76,36 +63,32 @@ def connect(serverIP, serverPort):
         chat_connection.close()
         return
 
-# function to disconnect from server
+
 def disconnect():
-    global connected, chat_connection, address, serverIP
-    # if chat_connection:
-    #     try: 
-    #         chat_connection.send(b' ')
-    #     except socket.error as errorMessage:
-    #         print(f"\nFailed to send disconnect message. Error: {errorMessage}")
-    # close socket 
+    """Disconnects from the chat server."""
+    global connected, chat_connection, address, host_ip
     connected = False
     if address == None:
-        print(f"\nDisconnected from {serverIP}\n")
+        print(f"\nDisconnected from {host_ip}\n")
     else:
         print(f"Disconnected from {address}\n")
     chat_connection.close()
 
-# function to send message 
+
 def send(message):
+    """Sends a message to the connected chat server."""
     global connected, chat_connection
     if connected == True:
         if chat_connection != None:
             chat_connection.send(message.encode())
             print(f"Message \"{message}\" sent")
-    # we do not have a connection 
     else:
         print("\nNot connected to a chat. Please connect to a chat before sending a message.")
 
 
 def receive_message():
-    global connected, chat_connection, serverIP, exit_flag, address
+    """Receives messages from the chat server."""
+    global connected, chat_connection, host_ip, exit_flag, address
     while not exit_flag:
         try:
             if connected == True:
@@ -116,8 +99,8 @@ def receive_message():
                         print(f"\n\nHost at {address} disconnected\n\nEnter command: ", end="")
                         address = None
                     else:
-                        print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
-                        serverIP = None
+                        print(f"\n\nHost at {host_ip} disconnected\n\nEnter command: ", end="")
+                        host_ip = None
                     chat_connection.close()
                     connected = False
                 elif message:
@@ -127,19 +110,17 @@ def receive_message():
         except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
             if address != None:
                 print(f"\n\nHost at {address} disconnected\n\nEnter command: ", end="")
-            # else:
-            #     print(f"\n\nHost at {serverIP} disconnected\n\nEnter command: ", end="")
             chat_connection.close()
             connected = False
         except socket.error as errorMessage:
             chat_connection.close()
             connected = False
 
-def wait_for_connection(server_port):
-    global connected, chat_connection, client_address, server_socket, address
-    server_socket = start_server(server_port)
 
-    # loop to check for connection
+def wait_for_connection(server_port):
+    """Waits for incoming chat connections."""
+    global connected, chat_connection, client_address, server_socket, address
+    server_socket = start_socket(server_port)
     while not exit_flag: 
         if connected == False:
             try:
@@ -147,14 +128,14 @@ def wait_for_connection(server_port):
                 address = client_address[0]
                 print(f"\n\nAccepted connection with {address}\n\nEnter command: ", end="")
                 connected = True
-                
             except socket.error as errorMessage:
                 pass
         else:
             pass
 
+
 def main():
-    global exit_flag, connected, server_socket, chat_connection, server_port, serverIP
+    global exit_flag, connected, server_socket, chat_connection, server_port, host_ip
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -166,16 +147,15 @@ def main():
         except ValueError:
             print("Invalid input. Port number must be an integer.")
 
-    # listen for incoming connections
+    # start thread to listen for incoming connections
     server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
     server_thread.start()
 
+    # start thread to receive messages
     receive_thread = threading.Thread(target=receive_message)
     receive_thread.start()
 
-    # inform user that chat is ready to start
     print(f"\nChat running at {server_address} on port {server_port}")
-    
     # print initial command list
     print_commands()
 
@@ -203,16 +183,17 @@ def main():
                         print("Expected format: connect <IP address> <port number>")
                     else:
                         # check if port number is valid
-                        serverPort = int(commandParts[2])
-                        if serverPort < 10000 or serverPort > 20000:
+                        host_port = int(commandParts[2])
+                        if host_port < 10000 or host_port > 20000:
                             print("Port number must be between 10,000 and 20,000.")
                         else:
-                            serverIP = commandParts[1]
-                            connect(commandParts[1], serverPort)
+                            host_ip = commandParts[1]
+                            connect(host_ip, host_port)
                 else: 
                     print("Already connected to a chat. Please disconnect before connecting to another chat.")
             elif commandParts[0] == "send":
                 if connected == True:
+                    # check if message is attached to command "send"
                     if len(commandParts) < 2:
                         print("Command message was received, but no message was attached to command.")
                         print("Expected format: send <message>")
@@ -231,16 +212,15 @@ def main():
                     print("Not connected to a chat. Disconnect command is not available.\n")
             # handle exit command
             elif commandParts[0] == "exit":
-                exit_flag = True
-                server_socket.close()
-                chat_connection.close()
-                server_thread.join()
-                receive_thread.join()
-                exit(0)
+                exit_flag = True        # set exit flag to true to exit threads
+                server_socket.close()   # close server socket
+                chat_connection.close() # close chat connection socket
+                server_thread.join()    # wait for server thread to finish
+                receive_thread.join()   # wait for receive thread to finish
+                exit(0)                 # exit program gracefully
             # handle invalid command
             else:
                 print("Invalid command. Please enter a valid command from the list.\nType 'help' to see the list of commands.\n")
-
 
 
 if __name__ == "__main__":
