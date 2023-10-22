@@ -79,11 +79,11 @@ def connect(serverIP, serverPort):
 # function to disconnect from server
 def disconnect():
     global connected, chat_connection, address
-    if chat_connection:
-        try: 
-            chat_connection.send(b' ')
-        except socket.error as errorMessage:
-            print(f"\nFailed to send disconnect message. Error: {errorMessage}")
+    # if chat_connection:
+    #     try: 
+    #         chat_connection.send(b' ')
+    #     except socket.error as errorMessage:
+    #         print(f"\nFailed to send disconnect message. Error: {errorMessage}")
     # close socket 
     connected = False
     print(f"Disconnected from {address}\n")
