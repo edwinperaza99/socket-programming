@@ -10,9 +10,6 @@ SOCKETS_LIST = []
 hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
-# TODO: testing this to handle input 
-priority_event = threading.Event()
-
 
 # TODO: I think this is done
 def print_commands():
@@ -23,8 +20,23 @@ def print_commands():
     if connected == True:
         print("send <host-IP or alias> <message>")
         print("disconnect <host-IP or alias>")
+        print("set_alias <host-IP> <alias>")
     print("help")
     print("exit\n")
+
+
+def set_alias(host_ip, alias):
+    """Sets the alias for a connection."""
+    global SOCKETS_LIST
+    alias_found = False
+    for socket in SOCKETS_LIST:
+        if socket['address'][0] == host_ip:
+            socket['alias'] = alias
+            print(f"Alias for {socket['address'][0]} set to {socket['alias']}")
+            alias_found = True
+            break
+    if alias_found == False:
+        print(f"Host IP '{host_ip}' not found. Please try again.")
 
 
 # TODO: I think this is done
@@ -121,7 +133,6 @@ def receive_message():
     """Receives messages from the chat server."""
     global connected, SOCKETS_LIST, exit_flag
     while not exit_flag:
-
         if connected == True:
             for socket in SOCKETS_LIST:
                 # TODO: MIGHT NEED TO REMOVE THIS TRY AND EXCEPT 
@@ -140,6 +151,15 @@ def receive_message():
                     # print(f"Failed to receive message. Error: {errorMessage}")
                     # exit(1)
                     socket['socket'].close()
+                    SOCKETS_LIST.remove(socket)
+                    if len(SOCKETS_LIST) == 0:
+                        connected = False
+                except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
+                    print(f"Disconnected from {socket['alias']}\n")
+                    socket['socket'].close()
+                    SOCKETS_LIST.remove(socket)
+                    if len(SOCKETS_LIST) == 0:
+                        connected = False
         else:
             pass
 
@@ -152,7 +172,6 @@ def wait_for_connection(server_port):
         try:
             chat_connection, client_address = server_socket.accept()
             print(f"\nConnection from {client_address[0]} has been established.")
-            priority_event.set()
             # Prompt the user for an alias for the connection
             # TODO: make the change alias functionality a function and remove from here to avoid race condition 
             # while True:
@@ -170,7 +189,8 @@ def wait_for_connection(server_port):
             #     if not alias_exists:
             #         break  # Exit the loop if the alias is unique
             #     print(f"Alias '{alias}' is already in use. Please choose a different alias.")
-            SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': 'alias'})
+            SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': client_address[0]})
+            connected = True
 
         except socket.error as errorMessage:
             pass
@@ -250,6 +270,13 @@ def main():
                 else:
                     alias = commandParts[1]
                     disconnect(alias)
+            # handle set_alias command
+            elif commandParts[0] == "set_alias":
+                # check if arguments are valid 
+                if len(commandParts) != 3:
+                    print("Expected format: set_alias <host-IP> <alias>")
+                else:
+                    set_alias(commandParts[1], commandParts[2])
             # handle exit command
             elif commandParts[0] == "exit":
                 exit_flag = True       # set exit flag to true
