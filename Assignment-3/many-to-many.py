@@ -2,8 +2,8 @@ import threading
 import socket
 
 # Global variables
-exit_flag = False
-connected = False
+EXIT_FLAG = False
+CONNECTED = False
 SOCKETS_LIST = []
 
 # Get the hostname and IP address of the server
@@ -14,10 +14,10 @@ server_address = socket.gethostbyname(hostname)
 # TODO: I think this is done
 def print_commands():
     """Prints a list of available commands based on the connection status."""
-    global connected
+    global CONNECTED
     print("\nList of commands:") 
     print("connect <IP address> <port number>")
-    if connected == True:
+    if CONNECTED == True:
         print("send <host-IP or alias> <message>")
         print("disconnect <host-IP or alias>")
         print("set_alias <host-IP> <alias>")
@@ -59,7 +59,7 @@ def start_socket(server_port):
 
 def connect(serverIP, serverPort):
     """Attempts to connect to a chat server."""
-    global connected, SOCKETS_LIST
+    global CONNECTED, SOCKETS_LIST
     # create a client socket
     try:
         chat_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -69,7 +69,7 @@ def connect(serverIP, serverPort):
     # connect to the server
     try:
         chat_connection.connect((serverIP, serverPort))
-        print(f"\nSuccessfully connected with {serverIP}\n")
+        print(f"\nSuccessfully CONNECTED with {serverIP}\n")
         # Prompt the user for an alias
         while True:
             response = input("Do you want to set an alias? (y/n): ").strip().lower()
@@ -87,8 +87,8 @@ def connect(serverIP, serverPort):
                 break  # Exit the loop if the alias is unique
             print(f"Alias '{alias}' is already in use. Please choose a different alias.")
         SOCKETS_LIST.append({'socket': chat_connection, 'address': (serverIP, serverPort), 'alias': alias})
-        if connected == False:
-            connected = True
+        if CONNECTED == False:
+            CONNECTED = True
     except socket.error as errorMessage:
         print(f"\nFailed to connect to the client. Error: {errorMessage}")
         chat_connection.close()
@@ -97,11 +97,11 @@ def connect(serverIP, serverPort):
 
 def disconnect(alias):
     """Disconnects from the chat server."""
-    global connected, SOCKETS_LIST
+    global CONNECTED, SOCKETS_LIST
     alias_found = False
     for socket in SOCKETS_LIST:
         if socket['alias'] == alias:
-            print(f"Disconnected from {socket['alias']}\n")
+            print(f"DisCONNECTED from {socket['alias']}\n")
             socket['socket'].close()
             SOCKETS_LIST.remove(socket)
             alias_found = True
@@ -109,14 +109,14 @@ def disconnect(alias):
     if alias_found == False:
         print(f"Alias '{alias}' not found. Please try again.")
     if len(SOCKETS_LIST) == 0:
-        connected = False
+        CONNECTED = False
 
 
 def send(message, alias):
     """Sends a message to the chat server."""
     global SOCKETS_LIST
     alias_found = False
-    if connected == True:
+    if CONNECTED == True:
         for socket in SOCKETS_LIST:
             if socket['alias'] == alias:
                 socket['socket'].send(message.encode())
@@ -126,24 +126,24 @@ def send(message, alias):
         if alias_found == False:
             print(f"Alias '{alias}' not found. Please try again.")
     else: 
-        print("\nNot connected to a chat. Please connect to a chat before sending a message.")
+        print("\nNot CONNECTED to a chat. Please connect to a chat before sending a message.")
 
 
 def receive_message():
     """Receives messages from the chat server."""
-    global connected, SOCKETS_LIST, exit_flag
-    while not exit_flag:
-        if connected == True:
+    global CONNECTED, SOCKETS_LIST, EXIT_FLAG
+    while not EXIT_FLAG:
+        if CONNECTED == True:
             for socket in SOCKETS_LIST:
                 # TODO: MIGHT NEED TO REMOVE THIS TRY AND EXCEPT 
                 try:
                     message = socket['socket'].recv(1024).decode()
                     if not message:
-                        print(f"Disconnected from {socket['alias']}\n")
+                        print(f"DisCONNECTED from {socket['alias']}\n")
                         socket['socket'].close()
                         SOCKETS_LIST.remove(socket)
                         if len(SOCKETS_LIST) == 0:
-                            connected = False
+                            CONNECTED = False
                     if message:
                         print(f"{socket['alias']}: {message}")
                 except socket.error as errorMessage:
@@ -153,22 +153,22 @@ def receive_message():
                     socket['socket'].close()
                     SOCKETS_LIST.remove(socket)
                     if len(SOCKETS_LIST) == 0:
-                        connected = False
+                        CONNECTED = False
                 except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
-                    print(f"Disconnected from {socket['alias']}\n")
+                    print(f"DisCONNECTED from {socket['alias']}\n")
                     socket['socket'].close()
                     SOCKETS_LIST.remove(socket)
                     if len(SOCKETS_LIST) == 0:
-                        connected = False
+                        CONNECTED = False
         else:
             pass
 
 
 def wait_for_connection(server_port):
     """Waits for incoming chat connections."""
-    global connected, SOCKETS_LIST, exit_flag, server_socket
+    global CONNECTED, SOCKETS_LIST, EXIT_FLAG, server_socket
     server_socket = start_socket(server_port)
-    while not exit_flag: 
+    while not EXIT_FLAG: 
         try:
             chat_connection, client_address = server_socket.accept()
             print(f"\nConnection from {client_address[0]} has been established.")
@@ -190,13 +190,13 @@ def wait_for_connection(server_port):
             #         break  # Exit the loop if the alias is unique
             #     print(f"Alias '{alias}' is already in use. Please choose a different alias.")
             SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': client_address[0]})
-            connected = True
+            CONNECTED = True
 
         except socket.error as errorMessage:
             pass
 
 def main():
-    global exit_flag, connected, SOCKETS_LIST, server_address
+    global EXIT_FLAG, CONNECTED, SOCKETS_LIST, server_address
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -252,7 +252,7 @@ def main():
                         connect(host_ip, host_port)
             # handle send command
             elif commandParts[0] == "send":
-                if connected == True:
+                if CONNECTED == True:
                     # check if arguments are valid
                     if len(commandParts) < 3:
                         print("Expected format: send <host-IP or alias> <message>")
@@ -261,7 +261,7 @@ def main():
                         message = " ".join(commandParts[2:])
                         send(message, alias)
                 else:
-                    print("\nNot connected to a chat. Please connect to a chat before sending a message.")
+                    print("\nNot CONNECTED to a chat. Please connect to a chat before sending a message.")
             # handle disconnect command 
             elif commandParts[0] == "disconnect":
                 # check if arguments are valid 
@@ -279,7 +279,7 @@ def main():
                     set_alias(commandParts[1], commandParts[2])
             # handle exit command
             elif commandParts[0] == "exit":
-                exit_flag = True       # set exit flag to true
+                EXIT_FLAG = True       # set exit flag to true
                 server_socket.close()  # close server socket
                 # close all sockets 
                 for socket in SOCKETS_LIST:
