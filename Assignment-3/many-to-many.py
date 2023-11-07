@@ -10,6 +10,9 @@ SOCKETS_LIST = []
 hostname = socket.gethostname()
 server_address = socket.gethostbyname(hostname)
 
+# TODO: testing this to handle input 
+priority_event = threading.Event()
+
 
 # TODO: I think this is done
 def print_commands():
@@ -149,23 +152,25 @@ def wait_for_connection(server_port):
         try:
             chat_connection, client_address = server_socket.accept()
             print(f"\nConnection from {client_address[0]} has been established.")
+            priority_event.set()
             # Prompt the user for an alias for the connection
-            while True:
-                response = input("Do you want to set an alias? (y/n): ").strip().lower()
-                if response == "y" or response == "yes":
-                    alias = input("Enter an alias: ")
-                elif response == "n" or response == "no":
-                    alias = client_address[0]
-                else:
-                    print(f"Invalid response. Please send yes(y) or no(n).")
-                    # TODO: might need to try with "pass"
-                    continue
-                # Check if the alias already exists in SOCKETS_LIST
-                alias_exists = any(socket['alias'] == alias for socket in SOCKETS_LIST)
-                if not alias_exists:
-                    break  # Exit the loop if the alias is unique
-                print(f"Alias '{alias}' is already in use. Please choose a different alias.")
-            SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': alias})
+            # TODO: make the change alias functionality a function and remove from here to avoid race condition 
+            # while True:
+            #     response = input("Do you want to set an alias? (y/n): ").strip().lower()
+            #     if response == "y" or response == "yes":
+            #         alias = input("Enter an alias: ")
+            #     elif response == "n" or response == "no":
+            #         alias = client_address[0]
+            #     else:
+            #         print(f"Invalid response. Please send yes(y) or no(n).")
+            #         # TODO: might need to try with "pass"
+            #         continue
+            #     # Check if the alias already exists in SOCKETS_LIST
+            #     alias_exists = any(socket['alias'] == alias for socket in SOCKETS_LIST)
+            #     if not alias_exists:
+            #         break  # Exit the loop if the alias is unique
+            #     print(f"Alias '{alias}' is already in use. Please choose a different alias.")
+            SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': 'alias'})
 
         except socket.error as errorMessage:
             pass
