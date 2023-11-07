@@ -30,7 +30,7 @@ def set_alias(host_ip, alias):
     global SOCKETS_LIST
     alias_found = False
     for socket in SOCKETS_LIST:
-        if socket['address'][0] == host_ip:
+        if socket['alias'] == host_ip:
             socket['alias'] = alias
             print(f"Alias for {socket['address'][0]} set to {socket['alias']}")
             alias_found = True
@@ -274,7 +274,7 @@ def main():
             elif commandParts[0] == "set_alias":
                 # check if arguments are valid 
                 if len(commandParts) != 3:
-                    print("Expected format: set_alias <host-IP> <alias>")
+                    print("Expected format: set_alias <host-IP or alias> <alias>")
                 else:
                     set_alias(commandParts[1], commandParts[2])
             # handle exit command
