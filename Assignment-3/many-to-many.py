@@ -30,7 +30,7 @@ def set_alias(host_ip, alias):
     global SOCKETS_LIST
     alias_found = False
     for socket in SOCKETS_LIST:
-        if socket['alias'] == host_ip:
+        if socket['alias'] == host_ip or socket['address'][0] == host_ip:
             socket['alias'] = alias
             print(f"Alias for {socket['address'][0]} set to {socket['alias']}")
             alias_found = True
@@ -100,8 +100,8 @@ def disconnect(alias):
     global CONNECTED, SOCKETS_LIST
     alias_found = False
     for socket in SOCKETS_LIST:
-        if socket['alias'] == alias:
-            print(f"DisCONNECTED from {socket['alias']}\n")
+        if socket['alias'] == alias or socket['address'][0] == alias:
+            print(f"Disconnected from {socket['alias']}\n")
             socket['socket'].close()
             SOCKETS_LIST.remove(socket)
             alias_found = True
@@ -118,7 +118,7 @@ def send(message, alias):
     alias_found = False
     if CONNECTED == True:
         for socket in SOCKETS_LIST:
-            if socket['alias'] == alias:
+            if socket['alias'] == alias or socket['address'][0] == alias:
                 socket['socket'].send(message.encode())
                 print(f"Message '{message}' sent to {socket['alias']}")
                 alias_found = True
@@ -139,7 +139,7 @@ def receive_message():
                 try:
                     message = socket['socket'].recv(1024).decode()
                     if not message:
-                        print(f"DisCONNECTED from {socket['alias']}\n")
+                        print(f"Disconnected from {socket['alias']}\n")
                         socket['socket'].close()
                         SOCKETS_LIST.remove(socket)
                         if len(SOCKETS_LIST) == 0:
@@ -155,7 +155,7 @@ def receive_message():
                     if len(SOCKETS_LIST) == 0:
                         CONNECTED = False
                 except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
-                    print(f"DisCONNECTED from {socket['alias']}\n")
+                    print(f"Disconnected from {socket['alias']}\n")
                     socket['socket'].close()
                     SOCKETS_LIST.remove(socket)
                     if len(SOCKETS_LIST) == 0:
