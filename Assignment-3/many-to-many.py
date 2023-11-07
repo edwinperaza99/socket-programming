@@ -133,8 +133,10 @@ def receive_message():
                     if message:
                         print(f"{socket['alias']}: {message}")
                 except socket.error as errorMessage:
-                    print(f"Failed to receive message. Error: {errorMessage}")
-                    exit(1)
+                    # TODO: MIGHT WANT TO REMOVE THIS AND JUST CLOSE SOCKET INSTEAD 
+                    # print(f"Failed to receive message. Error: {errorMessage}")
+                    # exit(1)
+                    socket['socket'].close()
         else:
             pass
 
@@ -146,6 +148,7 @@ def wait_for_connection(server_port):
     while not exit_flag: 
         try:
             chat_connection, client_address = server_socket.accept()
+            print(f"\nConnection from {client_address[0]} has been established.")
             # Prompt the user for an alias for the connection
             while True:
                 response = input("Do you want to set an alias? (y/n): ").strip().lower()
