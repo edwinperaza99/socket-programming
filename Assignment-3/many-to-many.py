@@ -21,22 +21,37 @@ def print_commands():
         print("send <host-IP or alias> <message>")
         print("disconnect <host-IP or alias>")
         print("set_alias <host-IP> <alias>")
+        print("list_connections")
     print("help")
     print("exit\n")
+
+
+def list_connections():
+    """Lists all connections with their aliases."""
+    global SOCKETS_LIST, CONNECTED
+    if CONNECTED == False:
+        print("\nList of connections:")
+        for socket_info in SOCKETS_LIST:
+            print(f"IP:{socket_info['address'][0]}\tAlias: {socket_info['alias']}")
+    else:
+        print("\nNot connected to a chat. Please connect to a chat before listing connections.")
 
 
 def set_alias(host_ip, alias):
     """Sets the alias for a connection."""
     global SOCKETS_LIST
     alias_found = False
-    for socket_info in SOCKETS_LIST:
-        if socket_info['alias'] == host_ip or socket_info['address'][0] == host_ip:
-            socket_info['alias'] = alias
-            print(f"Alias for {socket_info['address'][0]} set to {socket_info['alias']}")
-            alias_found = True
-            break
-    if alias_found == False:
-        print(f"Host IP '{host_ip}' not found. Please try again.")
+    if CONNECTED == True:
+        for socket_info in SOCKETS_LIST:
+            if socket_info['alias'] == host_ip or socket_info['address'][0] == host_ip:
+                socket_info['alias'] = alias
+                print(f"Alias for {socket_info['address'][0]} set to {socket_info['alias']}")
+                alias_found = True
+                break
+        if alias_found == False:
+            print(f"Host IP '{host_ip}' not found. Please try again.")
+    else:
+        print("\nNot connected to a chat. Please connect to a chat before setting an alias.")
 
 
 # TODO: I think this is done
@@ -275,6 +290,9 @@ def main():
                     print("Expected format: set_alias <host-IP or alias> <alias>")
                 else:
                     set_alias(commandParts[1], commandParts[2])
+            # handle list_connections command
+            elif commandParts[0] == "list_connections":
+                list_connections()
             # handle exit command
             elif commandParts[0] == "exit":
                 EXIT_FLAG = True       # set exit flag to true
