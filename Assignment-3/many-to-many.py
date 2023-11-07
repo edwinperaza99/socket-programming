@@ -27,6 +27,7 @@ def print_commands():
 # TODO: I think this is done
 def start_socket(server_port):
     """Creates and configures a socket to listen for connections."""
+    global server_socket
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
@@ -104,6 +105,7 @@ def send(message, alias):
         for socket in SOCKETS_LIST:
             if socket['alias'] == alias:
                 socket['socket'].send(message.encode())
+                print(f"Message '{message}' sent to {socket['alias']}")
                 alias_found = True
                 break
         if alias_found == False:
