@@ -29,7 +29,7 @@ def print_commands():
 def list_connections():
     """Lists all connections with their aliases."""
     global SOCKETS_LIST, CONNECTED
-    if CONNECTED == False:
+    if CONNECTED == True:
         print("\nList of connections:")
         for socket_info in SOCKETS_LIST:
             print(f"IP:{socket_info['address'][0]}\tAlias: {socket_info['alias']}")
@@ -68,7 +68,7 @@ def start_socket(server_port):
     except socket.error as errorMessage:
         print(f"Failed to bind socket. Error: {errorMessage}")
         exit(1)
-    server_socket.listen(1)
+    server_socket.listen()
     return server_socket
 
 
@@ -160,19 +160,19 @@ def receive_message():
                         if len(SOCKETS_LIST) == 0:
                             CONNECTED = False
                     if message:
-                        print(f"\n{socket_info['alias']}: {message}\n\nEnter command: ", end="")
-                except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
+                        print(f'\nMessage "{message}" received from {socket_info["alias"]}')
+                except (ConnectionResetError, ConnectionAbortedError, socket.error) as errorMessage:
                     print(f"Disconnected from {socket_info['alias']}\n")
                     socket_info['socket'].close()
                     SOCKETS_LIST.remove(socket_info)
                     if len(SOCKETS_LIST) == 0:
                         CONNECTED = False
-                except socket.error as errorMessage:
-                    # TODO: MIGHT WANT TO REMOVE THIS AND JUST CLOSE SOCKET INSTEAD 
-                    socket_info['socket'].close()
-                    SOCKETS_LIST.remove(socket_info)
-                    if len(SOCKETS_LIST) == 0:
-                        CONNECTED = False
+                # except socket.error as errorMessage:
+                #     # TODO: MIGHT WANT TO REMOVE THIS AND JUST CLOSE SOCKET INSTEAD 
+                #     socket_info['socket'].close()
+                #     SOCKETS_LIST.remove(socket_info)
+                #     if len(SOCKETS_LIST) == 0:
+                #         CONNECTED = False
         else:
             pass
 
@@ -185,23 +185,6 @@ def wait_for_connection(server_port):
         try:
             chat_connection, client_address = server_socket.accept()
             print(f"\nConnection from {client_address[0]} has been established.")
-            # Prompt the user for an alias for the connection
-            # TODO: make the change alias functionality a function and remove from here to avoid race condition 
-            # while True:
-            #     response = input("Do you want to set an alias? (y/n): ").strip().lower()
-            #     if response == "y" or response == "yes":
-            #         alias = input("Enter an alias: ")
-            #     elif response == "n" or response == "no":
-            #         alias = client_address[0]
-            #     else:
-            #         print(f"Invalid response. Please send yes(y) or no(n).")
-            #         # TODO: might need to try with "pass"
-            #         continue
-            #     # Check if the alias already exists in SOCKETS_LIST
-            #     alias_exists = any(socket['alias'] == alias for socket in SOCKETS_LIST)
-            #     if not alias_exists:
-            #         break  # Exit the loop if the alias is unique
-            #     print(f"Alias '{alias}' is already in use. Please choose a different alias.")
             SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': client_address[0]})
             CONNECTED = True
 
