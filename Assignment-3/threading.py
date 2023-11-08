@@ -5,6 +5,7 @@ import socket
 EXIT_FLAG = False
 CONNECTED = False
 SOCKETS_LIST = []
+ACTIVE_THREADS = []
 
 # Get the hostname and IP address of the server
 hostname = socket.gethostname()
@@ -101,9 +102,16 @@ def connect(serverIP, serverPort):
             if not alias_exists:
                 break  # Exit the loop if the alias is unique
             print(f"Alias '{alias}' is already in use. Please choose a different alias.")
-        SOCKETS_LIST.append({'socket': chat_connection, 'address': (serverIP, serverPort), 'alias': alias})
+
+        new_socket_info = {'socket': chat_connection, 'address': (serverIP, serverPort), 'alias': alias, 'active': True}
+        SOCKETS_LIST.append(new_socket_info)
         if CONNECTED == False:
             CONNECTED = True
+
+        # Create a new thread for each client to handle message reception
+        host_thread = threading.Thread(target=receive_message, args=(new_socket_info,))
+        host_thread.start()
+        ACTIVE_THREADS.append({'thread': host_thread, 'alias': alias})
     except socket.error as errorMessage:
         print(f"\nFailed to connect to the client. Error: {errorMessage}")
         chat_connection.close()
@@ -118,7 +126,12 @@ def disconnect(alias):
         if socket_info['alias'] == alias or socket_info['address'][0] == alias:
             print(f"Disconnected from {socket_info['alias']}\n")
             socket_info['socket'].close()
+            socket_info['active'] = False
             SOCKETS_LIST.remove(socket_info)
+            for thread_info in ACTIVE_THREADS:
+                if thread_info['alias'] == alias:
+                    thread_info['thread'].join()
+                    ACTIVE_THREADS.remove(thread_info)
             alias_found = True
             break
     if alias_found == False:
@@ -145,41 +158,33 @@ def send(message, alias):
 
 
 # TODO: I might have to run one of these threads for each socket
-def receive_message():
+def receive_message(socket_info):
     """Receives messages from the chat server."""
     global CONNECTED, SOCKETS_LIST, EXIT_FLAG
-    while not EXIT_FLAG:
+    # TODO: need to test this since we are removing exit flag 
+    while not EXIT_FLAG and socket_info['active']:
         if CONNECTED == True:
-            for socket_info in SOCKETS_LIST:
-                # TODO: MIGHT NEED TO REMOVE THIS TRY AND EXCEPT 
-                try:
-                    message = socket_info['socket'].recv(1024).decode()
-                    if not message:
-                        print(f"Disconnected from {socket_info['alias']}\n")
-                        socket_info['socket'].close()
-                        SOCKETS_LIST.remove(socket_info)
-                        if len(SOCKETS_LIST) == 0:
-                            CONNECTED = False
-                        # TODO: might work with return 
-                        return
-                    if message:
-                        print(f'\nMessage "{message}" received from {socket_info["alias"]}')
-                # just testing 
-                except: #(ConnectionResetError, ConnectionAbortedError, socket.error) as errorMessage:
+            try:
+                message = socket_info['socket'].recv(1024).decode()
+                if message:
+                    print(f'\nMessage "{message}" received from {socket_info["alias"]}')
+                elif not message:
                     print(f"Disconnected from {socket_info['alias']}\n")
                     socket_info['socket'].close()
                     SOCKETS_LIST.remove(socket_info)
                     if len(SOCKETS_LIST) == 0:
                         CONNECTED = False
-                    return
-                # except socket.error as errorMessage:
-                #     # TODO: MIGHT WANT TO REMOVE THIS AND JUST CLOSE SOCKET INSTEAD 
-                #     socket_info['socket'].close()
-                #     SOCKETS_LIST.remove(socket_info)
-                #     if len(SOCKETS_LIST) == 0:
-                #         CONNECTED = False
-        else:
-            pass
+            except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
+                print(f"Disconnected from {socket_info['alias']}\n")
+                socket_info['socket'].close()
+                SOCKETS_LIST.remove(socket_info)
+                if len(SOCKETS_LIST) == 0:
+                    CONNECTED = False
+            except socket.error as errorMessage:
+                socket_info['socket'].close()
+                SOCKETS_LIST.remove(socket_info)
+                if len(SOCKETS_LIST) == 0:
+                    CONNECTED = False
 
 
 def wait_for_connection(server_port):
@@ -190,9 +195,14 @@ def wait_for_connection(server_port):
         try:
             chat_connection, client_address = server_socket.accept()
             print(f"\nAccepted connection with {client_address[0]}.\n")
-            SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': client_address[0]})
+            new_socket_info = {'socket': chat_connection, 'address': client_address, 'alias': client_address[0], 'active': True}
+            SOCKETS_LIST.append(new_socket_info)
             CONNECTED = True
 
+            # Create a new thread for each client to handle message reception
+            host_thread = threading.Thread(target=receive_message, args=(new_socket_info,))
+            host_thread.start()
+            ACTIVE_THREADS.append({'thread': host_thread, 'alias': client_address[0]})
         except socket.error as errorMessage:
             pass
 
@@ -213,9 +223,10 @@ def main():
     server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
     server_thread.start()
 
+    # TODO: remove this comment 
     # start thread to receive messages
-    receive_thread = threading.Thread(target=receive_message)
-    receive_thread.start()
+    # receive_thread = threading.Thread(target=receive_message)
+    # receive_thread.start()
 
     print(f"\nChat running at {server_address} on port {server_port}")
     # print initial command list
@@ -288,7 +299,8 @@ def main():
                 for socket_info in SOCKETS_LIST:
                     socket_info['socket'].close()
                 server_thread.join()    # wait for server thread to finish
-                receive_thread.join()   # wait for receive thread to finish
+                # TODO: remove this comment 
+                # receive_thread.join()   # wait for receive thread to finish
                 exit(0)                 # exit program gracefully
             # handle invalid command 
             else:
