@@ -8,8 +8,8 @@ SOCKETS_LIST = []
 ACTIVE_THREADS = []
 
 # Get the hostname and IP address of the server
-hostname = socket.gethostname()
-server_address = socket.gethostbyname(hostname)
+# hostname = socket.gethostname()
+SERVER_ADDRESS = socket.gethostbyname(socket.gethostname())
 
 
 # TODO: I think this is done
@@ -207,7 +207,7 @@ def wait_for_connection(server_port):
             pass
 
 def main():
-    global EXIT_FLAG, CONNECTED, SOCKETS_LIST, server_address
+    global EXIT_FLAG, CONNECTED, SOCKETS_LIST, SERVER_ADDRESS
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
@@ -228,7 +228,7 @@ def main():
     # receive_thread = threading.Thread(target=receive_message)
     # receive_thread.start()
 
-    print(f"\nChat running at {server_address} on port {server_port}")
+    print(f"\nChat running at {SERVER_ADDRESS} on port {server_port}")
     # print initial command list
     print_commands()
 
