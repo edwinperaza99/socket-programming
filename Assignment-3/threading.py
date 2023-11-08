@@ -298,6 +298,8 @@ def main():
                 # close all sockets 
                 for socket_info in SOCKETS_LIST:
                     socket_info['socket'].close()
+                for thread_info in ACTIVE_THREADS:
+                    thread_info['thread'].join()
                 server_thread.join()    # wait for server thread to finish
                 # TODO: remove this comment 
                 # receive_thread.join()   # wait for receive thread to finish
