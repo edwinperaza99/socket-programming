@@ -160,6 +160,8 @@ def receive_message():
                         SOCKETS_LIST.remove(socket_info)
                         if len(SOCKETS_LIST) == 0:
                             CONNECTED = False
+                        # TODO: might work with return 
+                        return
                     if message:
                         print(f'\nMessage "{message}" received from {socket_info["alias"]}')
                 # just testing 
@@ -169,6 +171,7 @@ def receive_message():
                     SOCKETS_LIST.remove(socket_info)
                     if len(SOCKETS_LIST) == 0:
                         CONNECTED = False
+                    return
                 # except socket.error as errorMessage:
                 #     # TODO: MIGHT WANT TO REMOVE THIS AND JUST CLOSE SOCKET INSTEAD 
                 #     socket_info['socket'].close()
