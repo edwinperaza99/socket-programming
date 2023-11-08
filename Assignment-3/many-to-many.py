@@ -144,6 +144,7 @@ def send(message, alias):
         print("\nNot connected to a chat. Please connect to a chat before sending a message.")
 
 
+# TODO: I might have to run one of these threads for each socket
 def receive_message():
     """Receives messages from the chat server."""
     global CONNECTED, SOCKETS_LIST, EXIT_FLAG
@@ -161,7 +162,8 @@ def receive_message():
                             CONNECTED = False
                     if message:
                         print(f'\nMessage "{message}" received from {socket_info["alias"]}')
-                except (ConnectionResetError, ConnectionAbortedError, socket.error) as errorMessage:
+                # just testing 
+                except: #(ConnectionResetError, ConnectionAbortedError, socket.error) as errorMessage:
                     print(f"Disconnected from {socket_info['alias']}\n")
                     socket_info['socket'].close()
                     SOCKETS_LIST.remove(socket_info)
@@ -184,7 +186,7 @@ def wait_for_connection(server_port):
     while not EXIT_FLAG: 
         try:
             chat_connection, client_address = server_socket.accept()
-            print(f"\nConnection from {client_address[0]} has been established.")
+            print(f"\nAccepted connection with {client_address[0]}.\n")
             SOCKETS_LIST.append({'socket': chat_connection, 'address': client_address, 'alias': client_address[0]})
             CONNECTED = True
 
@@ -220,7 +222,7 @@ def main():
         # loop to handle main program commands 
     while True:
         try:
-            command = input("Enter command: ")
+            command = input("Enter command: \n")
         except ValueError:
             print("Invalid input. Please enter a valid command from the list. \nType 'help' to see the list of commands.\n")
         # split command into parts
