@@ -127,12 +127,14 @@ def disconnect(alias):
             print(f"Disconnected from {socket_info['alias']}\n")
             socket_info['socket'].close()
             socket_info['active'] = False
-            SOCKETS_LIST.remove(socket_info)
+            # will try by removing just after closing thread 
+            # SOCKETS_LIST.remove(socket_info)
             for thread_info in ACTIVE_THREADS:
                 if thread_info['alias'] == alias:
                     thread_info['thread'].join()
                     ACTIVE_THREADS.remove(thread_info)
             alias_found = True
+            SOCKETS_LIST.remove(socket_info)
             break
     if alias_found == False:
         print(f"Alias '{alias}' not found. Please try again.")
