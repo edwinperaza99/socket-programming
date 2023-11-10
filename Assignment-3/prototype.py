@@ -118,10 +118,9 @@ def connect(serverIP, serverPort):
         return
     
 
-def disconnect(alias):
+def disconnect(alias, alias_found = False):
     """Disconnects from the chat server."""
     global CONNECTED, SOCKETS_LIST
-    alias_found = False
     for socket_info in SOCKETS_LIST:
         if socket_info['alias'] == alias or socket_info['address'][0] == alias:
             print(f"\nDisconnected from {socket_info['alias']}\n")
@@ -178,7 +177,7 @@ def receive_message(socket_info):
                     # if len(SOCKETS_LIST) == 0:
                     #     CONNECTED = False
                     print("Error on first elif")
-                    disconnect(socket_info['alias'])
+                    disconnect(socket_info['alias'], True)
             except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
                 # print(f"Disconnected from {socket_info['alias']}\n")
                 # socket_info['socket'].close()
@@ -187,7 +186,7 @@ def receive_message(socket_info):
                 # if len(SOCKETS_LIST) == 0:
                 #     CONNECTED = False
                 print("Error on first except")
-                disconnect(socket_info['alias'])
+                disconnect(socket_info['alias'], True)
             except socket.error as errorMessage:
                 # socket_info['socket'].close()
                 # socket_info['active'] = False
