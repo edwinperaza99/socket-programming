@@ -228,7 +228,7 @@ def handle_threads():
                     break
 
 def main():
-    global EXIT_FLAG, CONNECTED, SOCKETS_LIST, SERVER_ADDRESS
+    global EXIT_FLAG, CONNECTED, SOCKETS_LIST, SERVER_ADDRESS, server_socket
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
     while True:
         try:
