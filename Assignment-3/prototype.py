@@ -324,9 +324,12 @@ def main():
                 EXIT_FLAG = True       # set exit flag to true
                 server_socket.close()  # close server socket
                 # close all sockets 
+                # for socket_info in SOCKETS_LIST:
+                #     socket_info['socket'].close()
+                #     socket_info['active'] = False
+                # TODO: try with function disconnect 
                 for socket_info in SOCKETS_LIST:
-                    socket_info['socket'].close()
-                    socket_info['active'] = False
+                    disconnect(socket_info['alias'], True)
                 # TODO: REMOVE COMMENTS 
                 # for thread_info in ACTIVE_THREADS:
                 #     thread_info['thread'].join()
