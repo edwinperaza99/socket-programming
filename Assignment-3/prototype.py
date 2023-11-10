@@ -176,7 +176,6 @@ def receive_message(socket_info):
                     # SOCKETS_LIST.remove(socket_info)
                     # if len(SOCKETS_LIST) == 0:
                     #     CONNECTED = False
-                    print("Error on first elif")
                     disconnect(socket_info['alias'], True)
             except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
                 # print(f"Disconnected from {socket_info['alias']}\n")
@@ -185,7 +184,6 @@ def receive_message(socket_info):
                 # SOCKETS_LIST.remove(socket_info)
                 # if len(SOCKETS_LIST) == 0:
                 #     CONNECTED = False
-                print("Error on first except")
                 disconnect(socket_info['alias'], True)
             except socket.error as errorMessage:
                 # socket_info['socket'].close()
