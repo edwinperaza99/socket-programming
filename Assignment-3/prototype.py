@@ -169,22 +169,28 @@ def receive_message(socket_info):
                 if message:
                     print(f'\nMessage "{message}" received from {socket_info["alias"]}')
                 elif not message:
-                    print(f"Disconnected from {socket_info['alias']}\n")
-                    socket_info['socket'].close()
-                    SOCKETS_LIST.remove(socket_info)
-                    if len(SOCKETS_LIST) == 0:
-                        CONNECTED = False
+                    # print(f"Disconnected from {socket_info['alias']}\n")
+                    # socket_info['socket'].close()
+                    # socket_info['active'] = False
+                    # SOCKETS_LIST.remove(socket_info)
+                    # if len(SOCKETS_LIST) == 0:
+                    #     CONNECTED = False
+                    disconnect(socket_info['alias'])
             except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
-                print(f"Disconnected from {socket_info['alias']}\n")
-                socket_info['socket'].close()
-                SOCKETS_LIST.remove(socket_info)
-                if len(SOCKETS_LIST) == 0:
-                    CONNECTED = False
+                # print(f"Disconnected from {socket_info['alias']}\n")
+                # socket_info['socket'].close()
+                # socket_info['active'] = False
+                # SOCKETS_LIST.remove(socket_info)
+                # if len(SOCKETS_LIST) == 0:
+                #     CONNECTED = False
+                disconnect(socket_info['alias'])
             except socket.error as errorMessage:
-                socket_info['socket'].close()
-                SOCKETS_LIST.remove(socket_info)
-                if len(SOCKETS_LIST) == 0:
-                    CONNECTED = False
+                # socket_info['socket'].close()
+                # socket_info['active'] = False
+                # SOCKETS_LIST.remove(socket_info)
+                # if len(SOCKETS_LIST) == 0:
+                #     CONNECTED = False
+                disconnect(socket_info['alias'])
 
 
 def wait_for_connection(server_port):
