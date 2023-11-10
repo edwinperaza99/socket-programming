@@ -129,10 +129,10 @@ def disconnect(alias):
             socket_info['active'] = False
             # will try by removing just after closing thread 
             # SOCKETS_LIST.remove(socket_info)
-            for thread_info in ACTIVE_THREADS:
-                if thread_info['alias'] == alias:
-                    thread_info['thread'].join()
-                    ACTIVE_THREADS.remove(thread_info)
+            # for thread_info in ACTIVE_THREADS:
+            #     if thread_info['alias'] == alias:
+            #         thread_info['thread'].join()
+            #         ACTIVE_THREADS.remove(thread_info)
             alias_found = True
             SOCKETS_LIST.remove(socket_info)
             break
@@ -214,6 +214,18 @@ def wait_for_connection(server_port):
         except socket.error as errorMessage:
             pass
 
+
+def handle_threads():
+    """Handles all active threads."""
+    global ACTIVE_THREADS, SOCKETS_LIST
+    for socket_info in SOCKETS_LIST:
+        if socket_info['active'] == False:
+            for thread_info in ACTIVE_THREADS:
+                if thread_info['alias'] == socket_info['alias']:
+                    thread_info['thread'].join()
+                    ACTIVE_THREADS.remove(thread_info)
+                    break
+
 def main():
     global EXIT_FLAG, CONNECTED, SOCKETS_LIST, SERVER_ADDRESS
     # ask for port number to connect to and check that it is in the range of 10,000 to 20,000
@@ -226,6 +238,10 @@ def main():
                 print("Port number must be between 10,000 and 20,000.")
         except ValueError:
             print("Invalid input. Port number must be an integer.")
+
+    # start thread to handle threads 
+    thread_handler = threading.Thread(target=handle_threads)
+    thread_handler.start()
 
     # start thread to listen for incoming connections
     server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
@@ -306,9 +322,13 @@ def main():
                 # close all sockets 
                 for socket_info in SOCKETS_LIST:
                     socket_info['socket'].close()
-                for thread_info in ACTIVE_THREADS:
-                    thread_info['thread'].join()
+                    socket_info['active'] = False
+                # TODO: REMOVE COMMENTS 
+                # for thread_info in ACTIVE_THREADS:
+                #     thread_info['thread'].join()
+
                 server_thread.join()    # wait for server thread to finish
+                thread_handler.join()
                 # TODO: remove this comment 
                 # receive_thread.join()   # wait for receive thread to finish
                 exit(0)                 # exit program gracefully
