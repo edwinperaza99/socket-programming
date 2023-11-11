@@ -336,8 +336,8 @@ def main():
                 for socket_info in SOCKETS_LIST:
                     if socket_info['active'] == True:
                         disconnect(socket_info['alias'], True)
-                     # wait for 1 second
-                    time.sleep(1)
+                # wait for 2 second
+                time.sleep(2)
                 EXIT_FLAG = True       # set exit flag to true
                 # TODO: REMOVE COMMENTS 
                 # for thread_info in ACTIVE_THREADS:
