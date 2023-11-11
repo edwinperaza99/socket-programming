@@ -347,6 +347,7 @@ def main():
                 thread_handler.join()
                 # TODO: remove this comment 
                 # receive_thread.join()   # wait for receive thread to finish
+                print("\nChat program terminated. Goodbye!\n")
                 sys.exit(0)                 # exit program gracefully
             # handle invalid command 
             else:
