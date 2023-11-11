@@ -130,16 +130,7 @@ def disconnect(alias, alias_found = False):
             print(f"\nDisconnected from {socket_info['alias']}\n")
             socket_info['socket'].close()
             socket_info['active'] = False
-            # will try by removing just after closing thread 
-            # SOCKETS_LIST.remove(socket_info)
-            # for thread_info in ACTIVE_THREADS:
-            #     if thread_info['alias'] == alias:
-            #         thread_info['thread'].join()
-            #         ACTIVE_THREADS.remove(thread_info)
             alias_found = True
-            # TODO: try hadling this in the thread
-            # if socket_info['active'] == False:
-            #     SOCKETS_LIST.remove(socket_info)
             break
     if alias_found == False:
         print(f"Alias '{alias}' not found. Please try again.")
@@ -176,31 +167,12 @@ def receive_message(socket_info):
                 if message:
                     print(f'\nMessage "{message}" received from {socket_info["alias"]}')
                 elif not message:
-                    # print(f"Disconnected from {socket_info['alias']}\n")
-                    # socket_info['socket'].close()
-                    # socket_info['active'] = False
-                    # SOCKETS_LIST.remove(socket_info)
-                    # if len(SOCKETS_LIST) == 0:
-                    #     CONNECTED = False
                     if socket_info['active'] == True:
                         disconnect(socket_info['alias'], True)
             except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
-                # print(f"Disconnected from {socket_info['alias']}\n")
-                # socket_info['socket'].close()
-                # socket_info['active'] = False
-                # SOCKETS_LIST.remove(socket_info)
-                # if len(SOCKETS_LIST) == 0:
-                #     CONNECTED = False
                 if socket_info['active'] == True:
                     disconnect(socket_info['alias'], True)
             except socket.error as errorMessage:
-                # socket_info['socket'].close()
-                # socket_info['active'] = False
-                # SOCKETS_LIST.remove(socket_info)
-                # if len(SOCKETS_LIST) == 0:
-                #     CONNECTED = False
-                # print("Error on second except")
-                # disconnect(socket_info['alias'])
                 pass
 
 
@@ -256,11 +228,6 @@ def main():
     # start thread to listen for incoming connections
     server_thread = threading.Thread(target=wait_for_connection, args=(server_port,))
     server_thread.start()
-
-    # TODO: remove this comment 
-    # start thread to receive messages
-    # receive_thread = threading.Thread(target=receive_message)
-    # receive_thread.start()
 
     print(f"\nChat running at {SERVER_ADDRESS} on port {server_port}")
     # print initial command list
@@ -327,26 +294,16 @@ def main():
                 list_connections()
             # handle exit command
             elif commandParts[0] == "exit":
+                print("\nExiting chat program...\n")
                 server_socket.close()  # close server socket
-                # close all sockets 
-                # for socket_info in SOCKETS_LIST:
-                #     socket_info['socket'].close()
-                #     socket_info['active'] = False
-                # TODO: try with function disconnect 
                 for socket_info in SOCKETS_LIST:
                     if socket_info['active'] == True:
                         disconnect(socket_info['alias'], True)
                 # wait for 2 second
                 time.sleep(2)
                 EXIT_FLAG = True       # set exit flag to true
-                # TODO: REMOVE COMMENTS 
-                # for thread_info in ACTIVE_THREADS:
-                #     thread_info['thread'].join()
-
                 server_thread.join()    # wait for server thread to finish
                 thread_handler.join()
-                # TODO: remove this comment 
-                # receive_thread.join()   # wait for receive thread to finish
                 print("\nChat program terminated. Goodbye!\n")
                 sys.exit(0)                 # exit program gracefully
             # handle invalid command 
