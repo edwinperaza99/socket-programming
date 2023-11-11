@@ -178,7 +178,8 @@ def receive_message(socket_info):
                     # SOCKETS_LIST.remove(socket_info)
                     # if len(SOCKETS_LIST) == 0:
                     #     CONNECTED = False
-                    disconnect(socket_info['alias'], True)
+                    if socket_info['active'] == True:
+                        disconnect(socket_info['alias'], True)
             except (ConnectionResetError, ConnectionAbortedError) as errorMessage:
                 # print(f"Disconnected from {socket_info['alias']}\n")
                 # socket_info['socket'].close()
@@ -186,7 +187,8 @@ def receive_message(socket_info):
                 # SOCKETS_LIST.remove(socket_info)
                 # if len(SOCKETS_LIST) == 0:
                 #     CONNECTED = False
-                disconnect(socket_info['alias'], True)
+                if socket_info['active'] == True:
+                    disconnect(socket_info['alias'], True)
             except socket.error as errorMessage:
                 # socket_info['socket'].close()
                 # socket_info['active'] = False
