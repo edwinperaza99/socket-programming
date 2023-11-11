@@ -133,7 +133,9 @@ def disconnect(alias, alias_found = False):
             #         thread_info['thread'].join()
             #         ACTIVE_THREADS.remove(thread_info)
             alias_found = True
-            SOCKETS_LIST.remove(socket_info)
+            # TODO: try hadling this in the thread
+            # if socket_info['active'] == False:
+            #     SOCKETS_LIST.remove(socket_info)
             break
     if alias_found == False:
         print(f"Alias '{alias}' not found. Please try again.")
@@ -219,13 +221,14 @@ def wait_for_connection(server_port):
 def handle_threads():
     """Handles all active threads."""
     global ACTIVE_THREADS, SOCKETS_LIST
-    for socket_info in SOCKETS_LIST:
-        if socket_info['active'] == False:
-            for thread_info in ACTIVE_THREADS:
-                if thread_info['alias'] == socket_info['alias']:
-                    thread_info['thread'].join()
-                    ACTIVE_THREADS.remove(thread_info)
-                    break
+    while not EXIT_FLAG:
+        for socket_info in SOCKETS_LIST:
+            if socket_info['active'] == False:
+                for thread_info in ACTIVE_THREADS:
+                    if thread_info['alias'] == socket_info['alias']:
+                        thread_info['thread'].join()
+                        ACTIVE_THREADS.remove(thread_info)
+                SOCKETS_LIST.remove(socket_info)
 
 def main():
     global EXIT_FLAG, CONNECTED, SOCKETS_LIST, SERVER_ADDRESS, server_socket
@@ -318,7 +321,6 @@ def main():
                 list_connections()
             # handle exit command
             elif commandParts[0] == "exit":
-                EXIT_FLAG = True       # set exit flag to true
                 server_socket.close()  # close server socket
                 # close all sockets 
                 # for socket_info in SOCKETS_LIST:
@@ -327,6 +329,7 @@ def main():
                 # TODO: try with function disconnect 
                 for socket_info in SOCKETS_LIST:
                     disconnect(socket_info['alias'], True)
+                EXIT_FLAG = True       # set exit flag to true
                 # TODO: REMOVE COMMENTS 
                 # for thread_info in ACTIVE_THREADS:
                 #     thread_info['thread'].join()
