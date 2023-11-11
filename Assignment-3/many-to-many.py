@@ -1,5 +1,7 @@
 import threading
 import socket
+import sys
+import time
 
 # Global variables
 EXIT_FLAG = False
@@ -63,12 +65,12 @@ def start_socket(server_port):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as errorMessage:
         print(f"Failed to create client socket. Error: {errorMessage}")
-        exit(1)
+        sys.exit(1)
     try:
         server_socket.bind(('', server_port))
     except socket.error as errorMessage:
         print(f"Failed to bind socket. Error: {errorMessage}")
-        exit(1)
+        sys.exit(1)
     server_socket.listen()
     return server_socket
 
@@ -79,6 +81,8 @@ def connect(serverIP, serverPort):
     # create a client socket
     try:
         chat_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # give a maximum of 10 seconds to connect to the server
+        chat_connection.settimeout(10)
     except socket.error as errorMessage:
         print(f"\nFailed to create client socket. Error: {errorMessage}")
         return
@@ -330,7 +334,10 @@ def main():
                 #     socket_info['active'] = False
                 # TODO: try with function disconnect 
                 for socket_info in SOCKETS_LIST:
-                    disconnect(socket_info['alias'], True)
+                    if socket_info['active'] == True:
+                        disconnect(socket_info['alias'], True)
+                     # wait for 1 second
+                    time.sleep(1)
                 EXIT_FLAG = True       # set exit flag to true
                 # TODO: REMOVE COMMENTS 
                 # for thread_info in ACTIVE_THREADS:
@@ -340,7 +347,7 @@ def main():
                 thread_handler.join()
                 # TODO: remove this comment 
                 # receive_thread.join()   # wait for receive thread to finish
-                exit(0)                 # exit program gracefully
+                sys.exit(0)                 # exit program gracefully
             # handle invalid command 
             else:
                 print("Invalid command. Please enter a valid command from the list. \nType 'help' to see the list of commands.\n")
