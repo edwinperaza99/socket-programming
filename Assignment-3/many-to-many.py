@@ -224,7 +224,7 @@ def handle_threads():
             if socket_info['active'] == False:
                 for thread_info in ACTIVE_THREADS:
                     # match the thread to the socket using the alias
-                    if thread_info['alias'] == socket_info['alias']:
+                    if thread_info['alias'] == socket_info['alias'] or thread_info['alias'] == socket_info['address'][0]:
                         thread_info['thread'].join()
                         ACTIVE_THREADS.remove(thread_info)
                 SOCKETS_LIST.remove(socket_info)
